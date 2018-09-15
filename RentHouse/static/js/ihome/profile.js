@@ -13,7 +13,7 @@ function getCookie(name) {
 
 $(document).ready(function () {
     // 在页面加载是向后端查询用户的信息
-    $.get("/api/v1.0/user", function(resp){
+    $.get("/api/v1.0/userinfo", function(resp){
         // 用户未登录
         if ("4101" == resp.errno) {
             location.href = "/login.html";
@@ -21,8 +21,8 @@ $(document).ready(function () {
         // 查询到了用户的信息
         else if ("0" == resp.errno) {
             $("#user-name").val(resp.data.name);
-            if (resp.data.avatar) {
-                $("#user-avatar").attr("src", resp.data.avatar);
+            if (resp.data.avatar_url) {
+                $("#user-avatar").attr("src", resp.data.avatar_url);
             }
         }
     }, "json");

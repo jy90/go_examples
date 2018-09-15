@@ -31,6 +31,6 @@ func main() {
 	ignoreStaticPath()
 
 	// beego.BConfig.WebConfig.Session.SessionOn = true //或者在app.conf中设置 sessionon = true
-	// beego.SetStaticPath("/group1/M00", "fastfs/storage_data/path")
+	// beego.SetStaticPath("/group1/M00", "/data/fastfs/storage_data/")
 	beego.Run()
 }

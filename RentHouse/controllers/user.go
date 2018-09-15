@@ -135,10 +135,17 @@ func (this *UserController) UploadAvatar() {
 
 	beego.Info("upload to fastdfs success groupName =", groupName, " fileId =", fileId)
 	user_id := this.GetSession("user_id")
-	user := models.User{Id: user_id.(int), Avatar_url: fileId}
 
 	o := orm.NewOrm()
-	if _, err := o.Update(&user, "avatar_url"); err != nil {
+	user := models.User{Id: user_id.(int)}
+	if err := o.Read(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+
+	user.Avatar_url = fileId
+	if _, err := o.Update(&user); err != nil {
 		resp["errno"] = models.RECODE_DBERR
 		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
 		return
@@ -148,5 +155,89 @@ func (this *UserController) UploadAvatar() {
 	url_map := make(map[string]interface{})
 	url_map["avatar_url"] = avatar_url
 	resp["data"] = url_map
+	return
+}
+
+func (this *UserController) GetUserInfo() {
+	resp := make(map[string]interface{})
+	resp["errno"] = models.RECODE_OK
+	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
+	defer this.RetData(resp)
+
+	user_id := this.GetSession("user_id")
+	user := models.User{Id: user_id.(int)}
+
+	o := orm.NewOrm()
+	// qs := o.QueryTable("user")
+	if err := o.Read(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+	user.Avatar_url = "http://www.dog128.cn/" + user.Avatar_url
+	resp["data"] = &user
+	return
+}
+
+func (this *UserController) UpdateUserName() {
+	resp := make(map[string]interface{})
+	resp["errno"] = models.RECODE_OK
+	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
+	defer this.RetData(resp)
+
+	user_id := this.GetSession("user_id")
+	UserName := make(map[string]string)
+	json.Unmarshal(this.Ctx.Input.RequestBody, &UserName)
+	beego.Info("get userName from RequestBody, UserName = ", UserName["name"])
+
+	o := orm.NewOrm()
+	user := models.User{Id: user_id.(int)}
+
+	if err := o.Read(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+
+	user.Name = UserName["name"]
+	if _, err := o.Update(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+
+	this.SetSession("name", user.Name)
+	resp["data"] = &user
+	return
+}
+
+func (this *UserController) UserAuth() {
+	resp := make(map[string]interface{})
+	resp["errno"] = models.RECODE_OK
+	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
+	defer this.RetData(resp)
+
+	user_id := this.GetSession("user_id")
+	realInfo := make(map[string]string)
+	json.Unmarshal(this.Ctx.Input.RequestBody, &realInfo)
+	beego.Info("get Real_name from RequestBody, Real_name = ", realInfo["real_name"])
+
+	o := orm.NewOrm()
+	user := models.User{Id: user_id.(int)}
+
+	if err := o.Read(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+	user.Real_name = realInfo["real_name"]
+	user.Id_card = realInfo["id_card"]
+	if _, err := o.Update(&user); err != nil {
+		resp["errno"] = models.RECODE_DBERR
+		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
+		return
+	}
+
+	resp["data"] = &user
 	return
 }

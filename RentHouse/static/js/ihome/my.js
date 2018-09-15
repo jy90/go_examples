@@ -21,7 +21,7 @@ function logout() {
 }
 
 $(document).ready(function(){
-    $.get("/api/v1.0/user", function(resp){
+    $.get("/api/v1.0/userinfo", function(resp){
         // 用户未登录
         if ("4101" == resp.errno) {
             location.href = "/login.html";
